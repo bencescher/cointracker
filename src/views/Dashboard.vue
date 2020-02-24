@@ -14,57 +14,61 @@
 </template>
 
 <script>
-import db from "../firebase/init.js";
 import polarArea from "../components/PolarArea.js";
 
 export default {
   name: "Home",
   data() {
     return {
-      polarDatacollection: [],
-      polarOptions: {},
-      transactions: [],
-      tags: [],
-      user: "testuser1"
+      polarDatacollection: {},
+      polarOptions: {}
+    }
+  },
+  computed: {
+    myTransactions() {
+      return this.$store.getters.myTransactions;
+    },
+    myTags() {
+      return this.$store.getters.myTags;
     }
   },
   components: {
-      "polar-area": polarArea
-    },
-  created() {
-    // load the transactions data from database
-    db.collection("userdata").doc(this.user).collection("transactions").get()
-    .then(storedTransactions => {
-      storedTransactions.forEach(transaction => {
-        this.transactions.push(transaction.data());
-      })
+    "polar-area": polarArea
+  },
+  watch: {
+    myTransactions() {
       this.displayChart();
-    });
-    // test adding tags to select options
-    db.collection("userdata").doc(this.user).get()
-    .then(storedUserData => {
-      this.tags = storedUserData.data().tags;
-
-      let tagselector = document.getElementById("tagselection");
-
-      this.tags.forEach(tagelement => {
-        tagselector.options[tagselector.options.length] = new Option(tagelement, tagelement);
-      });
-    });
+    },
+    myTags() {
+      this.fillSelect();
+    }
+  },
+  created() {
+    this.$store.dispatch("initTransactions");
+    this.$store.dispatch("initTags");
   },
   methods: {
+    fillSelect() {
+      let tagselector = document.getElementById("tagselection");
+      
+      this.myTags.forEach(tagelement => {
+        tagselector.options[
+          tagselector.options.length
+        ] = new Option(tagelement, tagelement);
+      });
+    },
     displayChart() {
-      let categories = ["Bills", "Food", "Travel", "Entertainment", "Shopping", "Education", "Household", "Sport", "Other"];
+      let categories = this.$store.getters.categories;
       let amounts = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-      this.transactions.forEach(transaction => {
+      this.myTransactions.forEach(transaction => {
         for (let i = 0; i < categories.length; i++) {
           if (transaction.category === categories[i].toLowerCase()) {
             amounts[i] += transaction.amount;
           }
         }
       });
-      // fill up datacollection with data from database
+      // fill up datacollection with data from transactions
       this.polarDatacollection = {
           datasets: [{
             data: amounts,
@@ -105,6 +109,5 @@ export default {
 
 .container__chart {
   margin: 0 auto;
-  width: 40%;
 }
 </style>
