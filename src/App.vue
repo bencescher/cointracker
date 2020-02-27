@@ -1,7 +1,11 @@
 <template>
   <div id="app">
     <app-header></app-header>
-    <router-view />
+    <main class="view-content">
+      <transition name="slide" mode="out-in">
+        <router-view />
+      </transition>
+    </main>
   </div>
 </template>
 

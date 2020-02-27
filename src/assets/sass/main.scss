@@ -1,5 +1,12 @@
+// global variables and mixins
+@import "./abstracts/mixins";
 @import "./abstracts/variables";
-
+// general settings
+@import "./base/animation";
 @import "./base/base";
-
+// custom grid system
 @import "./layout/grid";
+// reusable components
+@import "./components/header";
+// view-specific layouts
+@import "./views/dashboard";

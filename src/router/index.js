@@ -11,44 +11,37 @@ const routes = [
   {
     path: "/",
     name: "Landing",
-    component: () =>
-      import("../views/Landing.vue")
+    component: () => import("../views/Landing.vue")
   },
   {
     path: "/register",
     name: "Register",
-    component: () =>
-      import("../views/Register.vue")
+    component: () => import("../views/Register.vue")
   },
   {
     path: "/login",
     name: "Login",
-    component: () =>
-      import("../views/Login.vue")
+    component: () => import("../views/Login.vue")
   },
   {
     path: "/dashboard",
     name: "Dashboard",
-    component: () =>
-      import("../views/Dashboard.vue")
+    component: () => import("../views/Dashboard.vue")
   },
   {
     path: "/transactions",
     name: "Transactions",
-    component: () =>
-      import("../views/Transactions.vue")
+    component: () => import("../views/Transactions.vue")
   },
   {
     path: "/new",
     name: "NewTransaction",
-    component: () =>
-      import("../views/NewTransaction.vue")
+    component: () => import("../views/NewTransaction.vue")
   },
   {
     path: "/edit/:transactionId",
     name: "EditTransaction",
-    component: () =>
-      import("../views/EditTransaction.vue")
+    component: () => import("../views/EditTransaction.vue")
   }
 ];
 

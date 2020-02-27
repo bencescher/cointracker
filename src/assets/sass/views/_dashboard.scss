@@ -1,0 +1,16 @@
+.container {
+  padding: 1rem;
+
+  &__chart {
+    padding: 1rem;
+    
+
+    &--content {
+      padding: 1rem;
+
+      & .chart-polar {
+        position: relative;
+      }
+    }
+  }
+}
