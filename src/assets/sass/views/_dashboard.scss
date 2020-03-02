@@ -1,16 +1,12 @@
 .container {
-  padding: 1rem;
 
   &__chart {
-    padding: 1rem;
-    
+    margin: 3rem auto;
+    max-height: 75rem;
+    max-width: 60rem;
 
     &--content {
       padding: 1rem;
-
-      & .chart-polar {
-        position: relative;
-      }
     }
   }
 }

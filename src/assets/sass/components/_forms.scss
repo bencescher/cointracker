@@ -1,0 +1,80 @@
+.formbox {
+  border-radius: 3px;
+  margin: 0 auto;
+  max-width: 50rem;
+
+  &--header {
+    padding-bottom: 2rem;
+    text-align: center;
+  }
+}
+
+.form {
+  margin: 0 auto;
+  width: 50%;
+
+  &__group {
+    padding: .5rem;
+    
+    &:not(:last-child) {
+      margin-bottom: .5rem;
+    }
+
+    &:last-child {
+      text-align: center;
+    }
+  }
+
+  &__input {
+    border: none;
+    border-bottom: 2px solid rgba($c-blue-header-2, .75);
+    color: inherit;
+    display: block;
+    font-size: 1.4rem;
+    margin: 0 auto;
+    margin-bottom: 1rem;
+    padding: 1rem 1.5rem;
+    transition: all .3s;
+    width: 100%;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::-webkit-input-placeholder {
+      color: $c-gray-500;
+    }
+  }
+
+  &__input[type="date"] {
+    color: inherit;
+    font-family: inherit;
+    font-size: 1.5rem;
+  }
+
+  &__input:placeholder-shown + &__label {
+    opacity: 0;
+    transform: translateY(-4rem);
+    visibility: hidden;
+  }
+
+  &__label {
+    color: $c-gray-500;
+    font-size: 1.4rem;
+    margin-left: 1.5rem;
+    transition: all .3s;
+  }
+
+  &__select {
+    background-color: transparent;
+    border: 1px solid rgba($c-blue-header-1, .75);
+    border-radius: 3px;
+    box-sizing: border-box;
+    color: inherit;
+    font-size: 1.4rem;
+
+    &:focus {
+      outline: none;
+    }
+  }
+}

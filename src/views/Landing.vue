@@ -1,5 +1,5 @@
 <template>
   <section class="container">
-    <h4>Landing page</h4>
+    <h2>Landing page</h2>
   </section>
 </template>

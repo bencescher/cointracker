@@ -1,5 +1,5 @@
 <template>
   <section class="container">
-    <h4>Login view</h4>
+    <h2>Login view</h2>
   </section>
 </template>
