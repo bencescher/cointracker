@@ -6,6 +6,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    currentUser: "",
     categories: [
       "Bills",
       "Food",
@@ -20,6 +21,7 @@ export default new Vuex.Store({
     myTags: [],
     myTransactions: []
   },
+
   mutations: {
     SET_TRANSACTIONS(state) {
       state.myTransactions = [];
@@ -37,6 +39,15 @@ export default new Vuex.Store({
           console.log(error);
         });
     },
+    CREATE_TRANSACTION(state, newTransaction) {
+      state.currentUser = "testuser1";
+
+      db.collection("userdata")
+        .doc(state.currentUser)
+        .collection("transactions")
+        .add(newTransaction)
+    },
+
     SET_TAGS(state) {
       state.myTags = [];
       // query tags for logged in user from database
@@ -51,21 +62,30 @@ export default new Vuex.Store({
         });
     }
   },
+
   actions: {
     initTransactions: ({ commit }) => {
       commit("SET_TRANSACTIONS");
     },
+
     initTags: ({ commit }) => {
       commit("SET_TAGS");
+    },
+    
+    createTransactions: ({ commit }, newTransaction) => {
+      commit("CREATE_TRANSACTION", newTransaction);
     }
   },
+
   getters: {
     categories: state => {
       return state.categories;
     },
+
     myTags: state => {
       return state.myTags;
     },
+
     myTransactions: state => {
       return state.myTransactions;
     }

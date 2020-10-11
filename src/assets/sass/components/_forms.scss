@@ -24,6 +24,24 @@
       text-align: center;
     }
   }
+  &__taginput {
+    border: none;
+    border-bottom: 2px solid rgba($c-blue-header-2, .75);
+    color: inherit;
+    display: block;
+    font-size: 1.2rem;
+    margin-bottom: .4rem;
+    max-width: 60%;
+    padding: .5rem 1.5rem;
+    
+    &:focus {
+      outline: none;
+    }
+
+    &::-webkit-input-placeholder {
+      color: $c-gray-500;
+    }
+  }
 
   &__input {
     border: none;
@@ -33,7 +51,7 @@
     font-size: 1.4rem;
     margin: 0 auto;
     margin-bottom: 1rem;
-    padding: 1rem 1.5rem;
+    padding: .5rem 1.5rem;
     transition: all .3s;
     width: 100%;
 
