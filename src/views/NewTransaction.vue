@@ -14,7 +14,7 @@
               type="text"
               placeholder="Transaction type"
               required
-            >
+            />
             <label for="type" class="form__label">Transaction type</label>
           </div>
           <div class="form__group">
@@ -25,7 +25,7 @@
               type="text"
               placeholder="Transaction category"
               required
-            >
+            />
             <label for="category" class="form__label">Transaction category</label>
           </div>
           <div class="form__group">
@@ -37,7 +37,7 @@
                 placeholder="Cannot be empty"
                 type="text"
                 name="addedTag"
-              >
+              />
             </div>
           </div>
           <div class="form__group">
@@ -48,7 +48,7 @@
               class="form__input"
               type="text"
               placeholder="Push TAB to add tag"
-            >
+            />
             <label for="tags" class="form__label">Push TAB to add tag</label>
           </div>
           <div class="form__group">
@@ -59,7 +59,7 @@
               type="number"
               placeholder="Transaction amount"
               required
-            >
+            />
             <label for="amount" class="form__label">Transaction amount</label>
           </div>
           <div class="form__group">
@@ -69,7 +69,7 @@
               class="form__input"
               type="date"
               required
-            >
+            />
           </div>
           <div class="form__group">
             <button class="btn btn--green" type="submit">Save</button>
@@ -93,20 +93,29 @@ export default {
         timestamp: 0
       },
       tag: null
-    }
+    };
   },
+
   mounted() {
     const currentDate = new Date().toISOString().substr(0, 10);
 
     document.getElementById("timestamp").value = currentDate;
   },
+
+  computed: {
+    myTags() {
+      return this.$store.getters.myTags;
+    }
+  },
+
   methods: {
     addTag() {
       if (this.tag) {
-        this.newTransaction.tags.push(this.tag);
+        this.newTransaction.tags.push(this.tag.toLowerCase());
         this.tag = null;
       }
     },
+
     saveTransaction() {
       this.newTransaction.amount = parseInt(this.newTransaction.amount);
       this.newTransaction.timestamp = new Date(this.transactionDate).getTime();
@@ -114,8 +123,20 @@ export default {
       this.$store.dispatch("createTransactions", this.newTransaction)
         .then(() => {
           this.$store.dispatch("initTransactions");
+          this.newTransaction.tags.forEach(newTag => {
+            if (!this.myTags.includes(newTag.toLowerCase())) {
+              this.$store.dispatch("createTag", newTag);
+            }
+          });
+          this.newTransaction = {
+            type: "",
+            category: "",
+            tags: [],
+            amount: "",
+            timestamp: 0
+          };
         });
     }
   }
-}
+};
 </script>

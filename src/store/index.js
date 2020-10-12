@@ -1,5 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import firebase from "firebase";
 import db from "../firebase/init";
 
 Vue.use(Vuex);
@@ -7,17 +8,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     currentUser: "",
-    categories: [
-      "Bills",
-      "Food",
-      "Travel",
-      "Entertainment",
-      "Shopping",
-      "Education",
-      "Household",
-      "Sport",
-      "Other"
-    ],
+    categories: [],
     myTags: [],
     myTransactions: []
   },
@@ -39,13 +30,34 @@ export default new Vuex.Store({
           console.log(error);
         });
     },
+
     CREATE_TRANSACTION(state, newTransaction) {
       state.currentUser = "testuser1";
 
       db.collection("userdata")
         .doc(state.currentUser)
         .collection("transactions")
-        .add(newTransaction)
+        .add(newTransaction);
+    },
+
+    SET_CATEGORIES(state) {
+      state.categories = [];
+
+      state.myTransactions.forEach(transaction => {
+        if (!state.categories.includes(transaction.category)) {
+          state.categories.push(transaction.category);
+        }
+      });
+    },
+
+    CREATE_TAG(state, newTag) {
+      state.currentUser = "testuser1";
+
+      db.collection("userdata")
+        .doc(state.currentUser)
+        .update({
+          tags: firebase.firestore.FieldValue.arrayUnion(newTag)
+        });
     },
 
     SET_TAGS(state) {
@@ -68,10 +80,18 @@ export default new Vuex.Store({
       commit("SET_TRANSACTIONS");
     },
 
+    initCategories: ({ commit }) => {
+      commit("SET_CATEGORIES");
+    },
+
     initTags: ({ commit }) => {
       commit("SET_TAGS");
     },
-    
+
+    createTag: ({ commit }, newTag) => {
+      commit("CREATE_TAG", newTag);
+    },
+
     createTransactions: ({ commit }, newTransaction) => {
       commit("CREATE_TRANSACTION", newTransaction);
     }
