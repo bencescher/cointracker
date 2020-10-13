@@ -19,7 +19,9 @@
       <router-link v-if="!activeUser" class="navbar__link" tag="a" to="/login">
         <i class="fas fa-sign-in-alt"></i> Login
       </router-link>
-      <a @click="logout" v-if="activeUser" class="navbar__link">Logout</a>
+      <a @click="logout" v-if="activeUser" class="navbar__link logout">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
     </div>
   </nav>
 </template>

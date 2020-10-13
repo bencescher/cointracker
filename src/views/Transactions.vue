@@ -32,9 +32,9 @@
                 class="tag"
               >{{ myTag }}</p>
             </section>
-            <sections class="transaction__content--date">
+            <section class="transaction__content--date">
               <p>{{ transaction.timestamp }}</p>
-            </sections>
+            </section>
           </section>
         </article>
       </section>

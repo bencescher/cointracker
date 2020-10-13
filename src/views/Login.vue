@@ -7,25 +7,33 @@
       <section class="formbox--content">
         <form class="form">
           <div class="form__group">
-            <label for="email">Email address</label>
             <input
               class="form__input"
-              type="email"
               name="email"
+              placeholder="Email address"
               required
+              type="email"
+              v-model="email"
             />
+            <label class="form__label" for="email">Email address</label>
           </div>
           <div class="form__group">
-            <label for="password">Password</label>
             <input
               class="form__input"
-              type="password"
               name="password"
+              placeholder="Password"
               required
+              type="password"
+              v-model="password"
             />
+            <label class="form__label" for="password">Password</label>
           </div>
           <div class="form__group">
-            <button class="btn btn--green" type="submit">Login</button>
+            <button
+              @click.prevent="login()" 
+              class="btn btn--green"
+              type="submit">Login
+            </button>
           </div>
         </form>
       </section>
@@ -34,12 +42,27 @@
 </template>
 
 <script>
+import firebase from "firebase";
+
 export default {
   name: "login",
 
   data() {
     return {
-      
+      email: "",
+      password: ""
+    }
+  },
+
+  methods: {
+    login() {
+      firebase.auth().signInWithEmailAndPassword(this.email, this.password)
+        .then(() => {
+          this.$router.go({ path: this.$router.path })
+        },
+      err => {
+        alert(err.message)
+      })
     }
   }
 }
