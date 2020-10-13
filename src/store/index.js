@@ -50,11 +50,27 @@ export default new Vuex.Store({
     },
 
     CREATE_TAG(state, newTag) {
-      db.collection("userdata")
-        .doc(state.currentUser)
-        .update({
-          tags: firebase.firestore.FieldValue.arrayUnion(newTag)
-        });
+      db.collection("userdata").doc(state.currentUser).get()
+        .then(userData => {
+          if (!userData.exists) {
+            db.collection("userdata")
+              .doc(state.currentUser)
+              .set({})
+                .then(() => {
+                  db.collection("userdata")
+                    .doc(state.currentUser)
+                    .update({
+                      tags: firebase.firestore.FieldValue.arrayUnion(newTag)
+                    });
+                });
+          } else {
+            db.collection("userdata")
+              .doc(state.currentUser)
+              .update({
+                tags: firebase.firestore.FieldValue.arrayUnion(newTag)
+              });
+          }
+        })
     },
 
     SET_TAGS(state) {

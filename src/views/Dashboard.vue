@@ -310,6 +310,7 @@ export default {
       const currentDate = new Date();
       let totalIncome = 0;
       let totalExpense = 0;
+      let balanceToUse = 0;
 
       this.myTransactions.forEach(transaction => {
         if (moment(transaction.timestamp).format("MMMM") === moment(currentDate).format("MMMM")) {
@@ -321,6 +322,12 @@ export default {
         }
       });
 
+      if (totalIncome > totalExpense) {
+        balanceToUse = totalIncome - totalExpense;
+      } else {
+        balanceToUse = 0;
+      }
+
       this.doughnutDatacollection = {
         datasets: [{
           backgroundColor: [
@@ -328,7 +335,7 @@ export default {
             backgroundColors[14]
           ],
           data: [
-            totalIncome - totalExpense,
+            balanceToUse,
             totalExpense
           ]
         }],

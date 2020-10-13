@@ -96,6 +96,10 @@ export default {
     };
   },
 
+  created() {
+    this.$store.dispatch("initTransactions");
+  },
+
   mounted() {
     const currentDate = new Date().toISOString().substr(0, 10);
 
