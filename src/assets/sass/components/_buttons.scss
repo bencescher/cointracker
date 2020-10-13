@@ -22,4 +22,18 @@
       background-color: $c-green-400;
     }
   }
+
+  &--transparent {
+    background-color: transparent;
+    border: 2px solid $c-gray-600;
+    color: $c-gray-600;
+    font-size: 1.6rem;
+
+    &:hover {
+      border: 2px solid $c-gray-700;
+      box-shadow: none;
+      color: $c-gray-700;
+      transform: none;
+    }
+  }
 }
