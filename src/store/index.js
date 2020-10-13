@@ -15,10 +15,11 @@ export default new Vuex.Store({
 
   mutations: {
     SET_TRANSACTIONS(state) {
+      state.currentUser = firebase.auth().currentUser.email;
       state.myTransactions = [];
       // query transactions for logged in user from database
       db.collection("userdata")
-        .doc("testuser1")
+        .doc(state.currentUser)
         .collection("transactions")
         .get()
         .then(storedTransactions => {
@@ -32,8 +33,6 @@ export default new Vuex.Store({
     },
 
     CREATE_TRANSACTION(state, newTransaction) {
-      state.currentUser = "testuser1";
-
       db.collection("userdata")
         .doc(state.currentUser)
         .collection("transactions")
@@ -51,8 +50,6 @@ export default new Vuex.Store({
     },
 
     CREATE_TAG(state, newTag) {
-      state.currentUser = "testuser1";
-
       db.collection("userdata")
         .doc(state.currentUser)
         .update({
@@ -64,7 +61,7 @@ export default new Vuex.Store({
       state.myTags = [];
       // query tags for logged in user from database
       db.collection("userdata")
-        .doc("testuser1")
+        .doc(state.currentUser)
         .get()
         .then(storedUserData => {
           state.myTags = storedUserData.data().tags;
