@@ -4,7 +4,7 @@
       <div class="col2-1">
         <article class="container__chart card">
           <header class="container__chart--header">
-            <h2>Current Balance</h2>
+            <h2>Balance | {{ currentAvailable }} HUF</h2>
           </header>
           <section class="container__chart--content">
             <doughnut-chart
@@ -123,6 +123,7 @@ export default {
   name: "Home",
   data() {
     return {
+      currentAvailable: 0,
       selectedTag: "",
       selectedCategory: "",
       selectedCategoryMonth: "",
@@ -238,7 +239,9 @@ export default {
       });
 
       const lastItem = this.myCategories.length - 1;
-      this.selectedCategory = this.myCategories[lastItem].charAt(0).toUpperCase() + this.myCategories[lastItem].substring(1);
+      if (this.myCategories[lastItem]) {
+        this.selectedCategory = this.myCategories[lastItem].charAt(0).toUpperCase() + this.myCategories[lastItem].substring(1);
+      }
     },
 
     fillTagSelect() {
@@ -334,6 +337,8 @@ export default {
           "Expenses"
         ]
       }
+
+      this.currentAvailable = totalIncome - totalExpense;
     },
 
     initBarChart() {
