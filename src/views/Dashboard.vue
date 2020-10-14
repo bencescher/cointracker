@@ -198,6 +198,7 @@ export default {
   watch: {
     myTransactions() {
       this.$store.dispatch("initCategories");
+      this.$store.dispatch("initTags");
       this.initCategoryPolarChart();
       this.fillCategorySelect();
       this.fillMonthSelect();

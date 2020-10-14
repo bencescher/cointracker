@@ -28,7 +28,6 @@ export default new Vuex.Store({
 
             transactionData.id = transaction.id;
             state.myTransactions.push(transactionData);
-            console.log(state.myTransactions);
           });
         })
         .catch(error => {
@@ -65,44 +64,18 @@ export default new Vuex.Store({
       });
     },
 
-    CREATE_TAG(state, newTag) {
-      state.myTags.push(newTag);
-
-      db.collection("userdata").doc(state.currentUser).get()
-        .then(userData => {
-          if (!userData.exists) {
-            db.collection("userdata")
-              .doc(state.currentUser)
-              .set({})
-                .then(() => {
-                  db.collection("userdata")
-                    .doc(state.currentUser)
-                    .update({
-                      tags: firebase.firestore.FieldValue.arrayUnion(newTag)
-                    });
-                });
-          } else {
-            db.collection("userdata")
-              .doc(state.currentUser)
-              .update({
-                tags: firebase.firestore.FieldValue.arrayUnion(newTag)
-              });
-          }
-        })
-    },
-
     SET_TAGS(state) {
       state.myTags = [];
       // query tags for logged in user from database
-      db.collection("userdata")
-        .doc(state.currentUser)
-        .get()
-        .then(storedUserData => {
-          state.myTags = storedUserData.data().tags;
-        })
-        .catch(error => {
-          console.log(error);
-        });
+      state.myTransactions.forEach(myTransaction => {
+        if (myTransaction.tags.length > 0) {
+          myTransaction.tags.forEach(myTag => {
+            if (!state.myTags.includes(myTag)) {
+              state.myTags.push(myTag);
+            }
+          })
+        }
+      });
     }
   },
 
@@ -117,10 +90,6 @@ export default new Vuex.Store({
 
     initTags: ({ commit }) => {
       commit("SET_TAGS");
-    },
-
-    createTag: ({ commit }, newTag) => {
-      commit("CREATE_TAG", newTag);
     },
 
     createTransactions: ({ commit }, newTransaction) => {

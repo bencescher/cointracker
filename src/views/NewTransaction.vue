@@ -122,12 +122,6 @@ export default {
       // dispatch new transaction action
       this.$store.dispatch("createTransactions", this.newTransaction)
         .then(() => {
-          this.$store.dispatch("initTransactions");
-          this.newTransaction.tags.forEach(newTag => {
-            if (!this.myTags.includes(newTag.toLowerCase())) {
-              this.$store.dispatch("createTag", newTag);
-            }
-          });
           this.newTransaction = {
             type: "",
             category: "",
