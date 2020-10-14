@@ -74,6 +74,24 @@
       }
     }
 
+    &--actions {
+      float: right;
+      font-size: 1.4rem;
+
+      i {
+        cursor: pointer;
+        padding-left: .5rem;
+      }
+
+      .fa-trash-alt:hover {
+        color: $c-red-600;
+      }
+
+      .fa-edit:hover {
+        color: $c-blue-500;
+      }
+    }
+
     &--date {
       float: right;
       font-style: italic;

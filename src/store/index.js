@@ -24,7 +24,11 @@ export default new Vuex.Store({
         .get()
         .then(storedTransactions => {
           storedTransactions.forEach(transaction => {
-            state.myTransactions.push(transaction.data());
+            const transactionData = transaction.data();
+
+            transactionData.id = transaction.id;
+            state.myTransactions.push(transactionData);
+            console.log(state.myTransactions);
           });
         })
         .catch(error => {
@@ -39,6 +43,18 @@ export default new Vuex.Store({
         .add(newTransaction);
     },
 
+    DELETE_TRANSACTION(state, transactionId) {
+      db.collection("userdata")
+        .doc(state.currentUser)
+        .collection("transactions")
+        .doc(transactionId).delete()
+          .then(() => {
+            state.myTransactions = state.myTransactions.filter(transaction => {
+              return transaction.id !== transactionId;
+            })
+          })
+    },
+
     SET_CATEGORIES(state) {
       state.categories = [];
 
@@ -50,6 +66,8 @@ export default new Vuex.Store({
     },
 
     CREATE_TAG(state, newTag) {
+      state.myTags.push(newTag);
+
       db.collection("userdata").doc(state.currentUser).get()
         .then(userData => {
           if (!userData.exists) {
@@ -107,6 +125,10 @@ export default new Vuex.Store({
 
     createTransactions: ({ commit }, newTransaction) => {
       commit("CREATE_TRANSACTION", newTransaction);
+    },
+
+    deleteTransaction: ({ commit }, transactionId) => {
+      commit("DELETE_TRANSACTION", transactionId);
     }
   },
 

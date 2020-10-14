@@ -4,7 +4,7 @@
       <div class="col2-1">
         <article class="container__chart card">
           <header class="container__chart--header">
-            <h2>Balance | {{ currentAvailable }} HUF</h2>
+            <h2>Balance | {{ currentAvailable | currency-format }} HUF</h2>
           </header>
           <section class="container__chart--content">
             <doughnut-chart
@@ -22,7 +22,7 @@
           <section class="container__chart--content">
             <bar-chart
               :chart-data="barDatacollection"
-              :options="barChartOptions"
+              :options="zeroChartOptions"
             ></bar-chart>
           </section>
         </article>
@@ -83,7 +83,7 @@
             ></select>
             <line-chart
               :chart-data="lineCategoryDatacollection"
-              :options="chartOptions"
+              :options="zeroChartOptions"
             ></line-chart>
           </section>
         </article>
@@ -102,7 +102,7 @@
             ></select>
             <line-chart
               :chart-data="lineTagDatacollection"
-              :options="chartOptions"
+              :options="zeroChartOptions"
             ></line-chart>
           </section>
         </article>
@@ -124,16 +124,21 @@ export default {
   data() {
     return {
       currentAvailable: 0,
+      currentDate: null,
+      monthList: [],
+      // select tag selected items
       selectedTag: "",
       selectedCategory: "",
       selectedCategoryMonth: "",
       selectedTagMonth: "",
+      // data collections for charts
       barDatacollection: {},
       doughnutDatacollection: {},
       lineCategoryDatacollection: {},
       lineTagDatacollection: {},
       polarCategoryDatacollection: {},
       polarTagDatacollection: {},
+      // custom options for charts
       chartOptions: {
         responsive: true,
         maintainAspectRatio: false,
@@ -143,7 +148,7 @@ export default {
           }
         }
       },
-      barChartOptions: {
+      zeroChartOptions: {
         scales: {
             yAxes: [{
                 ticks: {
@@ -183,6 +188,13 @@ export default {
     "polar-area": polarArea
   },
 
+  created() {
+    this.currentDate = new Date();
+    // read transactions and data from database
+    this.$store.dispatch("initTransactions");
+    this.$store.dispatch("initTags");
+  },
+
   watch: {
     myTransactions() {
       this.$store.dispatch("initCategories");
@@ -199,33 +211,43 @@ export default {
     },
 
     selectedCategory() {
+      // reload chart on selection change
       this.initCategoryLineChart();
     },
 
     selectedTag() {
+      // reload chart on selection change
       this.initTagLineChart();
     },
 
     selectedCategoryMonth() {
+      // reload chart on selection change
       this.initCategoryPolarChart();
     },
 
     selectedTagMonth() {
+      // reload chart on selection change
       this.initTagPolarChart();
-    }
-  },
+    },
 
-  created() {
-    this.$store.dispatch("initTransactions");
-    this.$store.dispatch("initTags");
+    currentDate() {
+      // fill month list with last 6 months in reverse order on current date change
+      for (let i = 0; i < 6; i++) {
+        this.monthList.push(moment(this.currentDate).subtract(i, "months").format("MMMM"));
+      }
+      this.monthList.reverse();
+    }
   },
 
   methods: {
     fillCategorySelect() {
+      // add all categories to selection tag options
       const categorySelector = document.getElementById("categorySelection");
 
+      // add each category element only once to selection by looping through categories
       this.myCategories.forEach(categoryElement => {
         let categoryAdded = false;
+
         categorySelector.options.forEach(existingOption => {
           if (existingOption.value === categoryElement) {
             categoryAdded = true
@@ -234,11 +256,14 @@ export default {
 
         if (!categoryAdded) {
           const formattedCategory = categoryElement.charAt(0).toUpperCase() + categoryElement.substring(1);
+
           categorySelector.options[categorySelector.options.length] = new Option(formattedCategory, formattedCategory);
         }
       });
 
+      // select last category option by default
       const lastItem = this.myCategories.length - 1;
+
       if (this.myCategories[lastItem]) {
         this.selectedCategory = this.myCategories[lastItem].charAt(0).toUpperCase() + this.myCategories[lastItem].substring(1);
       }
@@ -257,7 +282,9 @@ export default {
         );
       });
 
+      // select last tag option by default
       const lastItem = this.myTags.length - 1;
+
       this.selectedTag = this.myTags[lastItem];
     },
 
@@ -265,15 +292,8 @@ export default {
       // fill month selector options for category and tag polar charts
       const categoryMonthSelector = document.getElementById("categoryMonthSelection");
       const tagMonthSelector = document.getElementById("tagMonthSelection");
-      const currentDate = new Date();
-      const monthList = [];
 
-      for (let i = 0; i < 6; i++) {
-        monthList.push(moment(currentDate).subtract(i, "months").format("MMMM"));
-      }
-      monthList.reverse();
-
-      monthList.forEach(month => {
+      this.monthList.forEach(month => {
         let monthAdded = false;
         
         categoryMonthSelector.options.forEach(existingOption => {
@@ -287,7 +307,6 @@ export default {
             month
           );
         }
-
         monthAdded = false;
 
         tagMonthSelector.options.forEach(existingOption => {
@@ -302,18 +321,17 @@ export default {
           );
         }
       })
-      this.selectedCategoryMonth = monthList[5];
-      this.selectedTagMonth = monthList[5];
+      this.selectedCategoryMonth = this.monthList[5];
+      this.selectedTagMonth = this.monthList[5];
     },
 
     initDoughnutChart() {
-      const currentDate = new Date();
       let totalIncome = 0;
       let totalExpense = 0;
       let balanceToUse = 0;
 
       this.myTransactions.forEach(transaction => {
-        if (moment(transaction.timestamp).format("MMMM") === moment(currentDate).format("MMMM")) {
+        if (moment(transaction.timestamp).format("MMMM") === moment(this.currentDate).format("MMMM")) {
           if (transaction.type === "income") {
             totalIncome += transaction.amount;
           } else {
@@ -352,20 +370,17 @@ export default {
       const incomes = [];
       const expenses = [];
       const balances = [];
-      const monthList = [];
-      const currentDate = new Date();
 
+      // initialize the required arrays for bar chart with zeros
       for (let i = 0; i < 6; i++) {
         incomes.push(0);
         expenses.push(0);
-        monthList.push(moment(currentDate).subtract(i, "months").format("MMMM"));
       }
-      monthList.reverse();
 
       this.myTransactions.forEach(transaction => {
-        for (let i = 0; i < monthList.length; i++) {
+        for (let i = 0; i < this.monthList.length; i++) {
           if (transaction.timestamp) {
-            if (moment(transaction.timestamp).format("MMMM") === monthList[i]) {
+            if (moment(transaction.timestamp).format("MMMM") === this.monthList[i]) {
               if (transaction.type === "expense") {
                 expenses[i] += transaction.amount;
               } else {
@@ -380,7 +395,7 @@ export default {
       }
       // update chart with labels, data, colors
       this.barDatacollection = {
-        labels: monthList,
+        labels: this.monthList,
         datasets: [
           {
             backgroundColor: backgroundColors[6],
@@ -421,78 +436,71 @@ export default {
       };
     },
 
-    initTagPolarChart() {
+    initPolarCharts(myList, myType) {
       const amounts = [];
       const colors = [];
 
       // initialize amounts and colors depending on the number of tags
-      for (let i = 0; i < this.myTags.length; i++) {
+      for (let i = 0; i < myList.length; i++) {
         amounts.push(0);
         colors.push(backgroundColors[i]);
       }
 
-      if (amounts.length > 0 && this.myTags.length > 0) {
+      if (amounts.length > 0 && myList.length > 0) {
         this.myTransactions.forEach(transaction => {
-          for (let i = 0; i < this.myTags.length; i++) {
-            if (
-              transaction.tags 
-              && transaction.type === "expense"
-              && moment(transaction.timestamp).format("MMMM") === this.selectedTagMonth
-            ) {
-              if (transaction.tags.includes(this.myTags[i])) {
+          for (let i = 0; i < myList.length; i++) {
+            if (myType === "tag") {
+              if (
+                transaction.tags 
+                && transaction.type === "expense"
+                && moment(transaction.timestamp).format("MMMM") === this.selectedTagMonth
+              ) {
+                if (transaction.tags.includes(myList[i])) {
+                  amounts[i] += parseInt(transaction.amount);
+                }
+              }
+            } else if (myType === "category") {
+              if (
+                transaction.category === this.myCategories[i].toLowerCase()
+                && transaction.type === "expense"
+                && moment(transaction.timestamp).format("MMMM") === this.selectedCategoryMonth
+              ) {
                 amounts[i] += parseInt(transaction.amount);
               }
             }
           }
         });
         // update chart data
-        this.polarTagDatacollection = this.displayPolarChartData(amounts, colors, this.myTags);
+        if (myType === "tag") {
+          this.polarTagDatacollection = this.displayPolarChartData(amounts, colors, myList);
+        } else if (myType === "category") {
+          this.polarCategoryDatacollection = this.displayPolarChartData(amounts, colors, this.myCategories);
+        }
       }
+    },
+
+    initTagPolarChart() {
+      this.initPolarCharts(this.myTags, "tag");
     },
 
     initCategoryPolarChart() {
-      const amounts = [];
-      const colors = [];
-      
-      // initialize amounts and colors depending on the number of categories
-      for (let i = 0; i < this.myCategories.length; i++) {
-        amounts.push(0);
-        colors.push(backgroundColors[i]);
-      }
-
-      this.myTransactions.forEach(transaction => {
-        for (let i = 0; i < this.myCategories.length; i++) {
-          if (
-            transaction.category === this.myCategories[i].toLowerCase()
-            && transaction.type === "expense"
-            && moment(transaction.timestamp).format("MMMM") === this.selectedCategoryMonth
-          ) {
-            amounts[i] += parseInt(transaction.amount);
-          }
-        }
-      });
-      // update chart data
-      this.polarCategoryDatacollection = this.displayPolarChartData(amounts, colors, this.myCategories);
+      this.initPolarCharts(this.myCategories, "category");
     },
 
     initCategoryLineChart() {
-      const currentDate = new Date();
-      const monthList = [];
       const amountList = [];
       let color = "";
 
       if (this.selectedCategory && this.myTransactions) {
         for (let i = 0; i < 6; i++) {
           amountList.push(0);
-          monthList.push(moment(currentDate).subtract(i, "months").format("MMMM"));
         }
-        monthList.reverse();
 
         this.myTransactions.forEach(transaction => {
           if (transaction.category.toLowerCase() === this.selectedCategory.toLowerCase()) {
-            for (let i = 0; i < monthList.length; i++) {
+            for (let i = 0; i < this.monthList.length; i++) {
               if (transaction.timestamp) {
-                if (moment(transaction.timestamp).format("MMMM") === monthList[i]) {
+                if (moment(transaction.timestamp).format("MMMM") === this.monthList[i]) {
                   amountList[i] += parseInt(transaction.amount);
                 }
               }
@@ -508,7 +516,7 @@ export default {
 
         // update chart with labels, data, colors
         this.lineCategoryDatacollection = {
-          labels: monthList,
+          labels: this.monthList,
           datasets: [
             {
               label: this.selectedCategory,
@@ -521,8 +529,6 @@ export default {
     },
     
     initTagLineChart() {
-      const currentDate = new Date();
-      const monthList = [];
       const amountList = [];
       let color = "";
 
@@ -530,16 +536,14 @@ export default {
         // get names of current and previous 5 months as chart labels
         for (let i = 0; i < 6; i++) {
           amountList.push(0);
-          monthList.push(moment(currentDate).subtract(i, "months").format("MMMM"));
         }
-        monthList.reverse();
 
         this.myTransactions.forEach(transaction => {
           if (transaction.tags) {
             if (transaction.tags.includes(this.selectedTag)) {
-              for (let i = 0; i < monthList.length; i++) {
+              for (let i = 0; i < this.monthList.length; i++) {
                 if (transaction.timestamp) {
-                  if (moment(transaction.timestamp).format("MMMM") === monthList[i]) {
+                  if (moment(transaction.timestamp).format("MMMM") === this.monthList[i]) {
                     amountList[i] += parseInt(transaction.amount);
                   }
                 }
@@ -558,7 +562,7 @@ export default {
 
         // update chart with labels, data, colors
         this.lineTagDatacollection = {
-          labels: monthList,
+          labels: this.monthList,
           datasets: [
             {
               label: this.selectedTag,

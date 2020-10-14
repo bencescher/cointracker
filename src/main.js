@@ -8,6 +8,11 @@ import "./assets/css/all.css";
 
 Vue.config.productionTip = false;
 
+// vue filter for currency format
+Vue.filter('currency-format', (value)=> {
+  return value.toFixed().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+});
+
 firebase.auth().onAuthStateChanged(() => {
     new Vue({
       router,

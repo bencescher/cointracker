@@ -58,11 +58,11 @@ export default {
     login() {
       firebase.auth().signInWithEmailAndPassword(this.email, this.password)
         .then(() => {
-          this.$router.go({ path: this.$router.path })
-        },
-      err => {
-        alert(err.message)
-      })
+          this.$router.go({ path: this.$router.path });
+        })
+        .catch(err => {
+          alert(err.message);
+        })
     }
   }
 }

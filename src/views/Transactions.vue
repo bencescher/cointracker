@@ -19,7 +19,7 @@
               <span class="amount">
                 <span v-if="transaction.type === 'income'">+</span>
                 <span v-else>-</span>
-                {{ transaction.amount }} Ft
+                {{ transaction.amount | currency-format }} Ft
               </span>
               {{ transaction.category }}
             </p>
@@ -31,6 +31,13 @@
                 :key="index"
                 class="tag"
               >{{ myTag }}</p>
+            </section>
+            <section class="transaction__content--actions">
+              <i class="fas fa-edit"></i>
+              <i
+                @click="deleteTransaction(transaction.id)"
+                class="far fa-trash-alt"
+              ></i>
             </section>
             <section class="transaction__content--date">
               <p>{{ transaction.timestamp }}</p>
@@ -72,6 +79,16 @@ export default {
 
   created() {
     this.$store.dispatch("initTransactions");
+  },
+
+  methods: {
+    deleteTransaction(id) {
+      let confirmed = confirm("Deletion of transactions is permanent. Are you sure that you want to delete this transaction?");
+
+      if (confirmed) {
+        this.$store.dispatch("deleteTransaction", id);
+      }
+    }
   }
-}
+};
 </script>
