@@ -241,6 +241,10 @@ export default {
   },
 
   methods: {
+    capitalize(word) {
+      return word.charAt(0).toUpperCase() + word.substring(1);
+    },
+    
     fillCategorySelect() {
       // add all categories to selection tag options
       const categorySelector = document.getElementById("categorySelection");
@@ -256,7 +260,7 @@ export default {
         });
 
         if (!categoryAdded) {
-          const formattedCategory = categoryElement.charAt(0).toUpperCase() + categoryElement.substring(1);
+          const formattedCategory = this.capitalize(categoryElement);
 
           categorySelector.options[categorySelector.options.length] = new Option(formattedCategory, formattedCategory);
         }
@@ -266,7 +270,7 @@ export default {
       const lastItem = this.myCategories.length - 1;
 
       if (this.myCategories[lastItem]) {
-        this.selectedCategory = this.myCategories[lastItem].charAt(0).toUpperCase() + this.myCategories[lastItem].substring(1);
+        this.selectedCategory = this.capitalize(this.myCategories[lastItem]);
       }
     },
 
@@ -275,7 +279,7 @@ export default {
       const tagselector = document.getElementById("tagselection");
 
       this.myTags.forEach(tagelement => {
-        const formatOptionText = tagelement.charAt(0).toUpperCase() + tagelement.substring(1);
+        const formatOptionText = this.capitalize(tagelement);
         
         tagselector.options[tagselector.options.length] = new Option(
           formatOptionText,
@@ -324,6 +328,135 @@ export default {
       })
       this.selectedCategoryMonth = this.monthList[5];
       this.selectedTagMonth = this.monthList[5];
+    },
+
+    displayPolarChartData(amounts, colors, labels) {
+      // update polar charts with amounts, colors, labels
+      return {
+        datasets: [
+          {
+            data: amounts,
+            backgroundColor: colors
+          }
+        ],
+        labels: labels
+      };
+    },
+
+    displayLineChartData(amounts, color, labels, label) {
+      return {
+        labels: labels,
+        datasets: [
+          {
+            label: label,
+            backgroundColor: color,
+            data: amounts
+          }
+        ]
+      };
+    },
+
+    initPolarCharts(myList, myType) {
+      const amounts = [];
+      const colors = [];
+      const filteredAmounts = [];
+      const filteredColors = [];
+      const filteredMyList = [];
+
+      // initialize amounts and colors depending on the number of tags
+      for (let i = 0; i < myList.length; i++) {
+        amounts.push(0);
+        colors.push(backgroundColors[i]);
+      }
+
+      if (amounts.length > 0 && myList.length > 0) {
+        this.myTransactions.forEach(transaction => {
+          for (let i = 0; i < myList.length; i++) {
+            if (myType === "tag") {
+              if (
+                transaction.tags 
+                && transaction.type === "expense"
+                && moment(transaction.timestamp).format("MMMM") === this.selectedTagMonth
+              ) {
+                if (transaction.tags.includes(myList[i])) {
+                  amounts[i] += parseInt(transaction.amount);
+                }
+              }
+            } else if (myType === "category") {
+              if (
+                transaction.category === myList[i].toLowerCase()
+                && transaction.type === "expense"
+                && moment(transaction.timestamp).format("MMMM") === this.selectedCategoryMonth
+              ) {
+                amounts[i] += parseInt(transaction.amount);
+              }
+            }
+          }
+        });
+
+        for (let i = 0; i < amounts.length; i++) {
+          if (amounts[i] > 0) {
+            filteredAmounts.push(amounts[i]);
+            filteredColors.push(colors[i]);
+            filteredMyList.push(this.capitalize(myList[i]));
+          }
+        }
+        // update chart with labels, data, colors
+        const generateChartData = this.displayPolarChartData(filteredAmounts, filteredColors, filteredMyList);
+
+        if (myType === "tag") {
+          this.polarTagDatacollection = generateChartData;
+        } else if (myType === "category") {
+          this.polarCategoryDatacollection = generateChartData;
+        }
+      }
+    },
+
+    initLineCharts(myList, myType, mySelection) {
+      const amountList = [];
+      let color = "";
+
+      if (mySelection && this.myTransactions) {
+        for (let i = 0; i < 6; i++) {
+          amountList.push(0);
+        }
+
+        let generateList = transaction => {
+          for (let i = 0; i < this.monthList.length; i++) {
+            if (transaction.timestamp) {
+              if (moment(transaction.timestamp).format("MMMM") === this.monthList[i]) {
+                amountList[i] += parseInt(transaction.amount);
+              }
+            }
+          }
+        };
+
+        this.myTransactions.forEach(transaction => {
+          if (myType === "tag") {
+            if (transaction.tags.includes(mySelection)) {
+              generateList(transaction);
+            }
+          } else if (myType === "category") {
+            if (transaction.category.toLowerCase() === mySelection.toLowerCase()) {
+              generateList(transaction);
+            }
+          }
+        });
+        // determine the chart background color depending on the selected category
+        for (let i = 0; i < myList.length; i++) {
+          if (myList[i].toLowerCase() === mySelection.toLowerCase()) {
+            color = backgroundColors[i];
+          }
+        }
+        // update chart with labels, data, colors
+        const generateChartData = this.displayLineChartData(amountList, color, this.monthList, mySelection);
+
+        if (myType === "tag") {
+          this.lineTagDatacollection = generateChartData;
+        } else if (myType === "category") {
+          this.lineCategoryDatacollection = generateChartData;
+        }
+      }
     },
 
     initDoughnutChart() {
@@ -424,155 +557,20 @@ export default {
       };
     },
 
-    displayPolarChartData(amounts, colors, labels) {
-      // update polar charts with amounts, colors, labels
-      return {
-        datasets: [
-          {
-            data: amounts,
-            backgroundColor: colors
-          }
-        ],
-        labels: labels
-      };
-    },
-
-    initPolarCharts(myList, myType) {
-      const amounts = [];
-      const colors = [];
-
-      // initialize amounts and colors depending on the number of tags
-      for (let i = 0; i < myList.length; i++) {
-        amounts.push(0);
-        colors.push(backgroundColors[i]);
-      }
-
-      if (amounts.length > 0 && myList.length > 0) {
-        this.myTransactions.forEach(transaction => {
-          for (let i = 0; i < myList.length; i++) {
-            if (myType === "tag") {
-              if (
-                transaction.tags 
-                && transaction.type === "expense"
-                && moment(transaction.timestamp).format("MMMM") === this.selectedTagMonth
-              ) {
-                if (transaction.tags.includes(myList[i])) {
-                  amounts[i] += parseInt(transaction.amount);
-                }
-              }
-            } else if (myType === "category") {
-              if (
-                transaction.category === this.myCategories[i].toLowerCase()
-                && transaction.type === "expense"
-                && moment(transaction.timestamp).format("MMMM") === this.selectedCategoryMonth
-              ) {
-                amounts[i] += parseInt(transaction.amount);
-              }
-            }
-          }
-        });
-        // update chart data
-        if (myType === "tag") {
-          this.polarTagDatacollection = this.displayPolarChartData(amounts, colors, myList);
-        } else if (myType === "category") {
-          this.polarCategoryDatacollection = this.displayPolarChartData(amounts, colors, this.myCategories);
-        }
-      }
+    initCategoryPolarChart() {
+      this.initPolarCharts(this.myCategories, "category");
     },
 
     initTagPolarChart() {
       this.initPolarCharts(this.myTags, "tag");
     },
 
-    initCategoryPolarChart() {
-      this.initPolarCharts(this.myCategories, "category");
-    },
-
     initCategoryLineChart() {
-      const amountList = [];
-      let color = "";
-
-      if (this.selectedCategory && this.myTransactions) {
-        for (let i = 0; i < 6; i++) {
-          amountList.push(0);
-        }
-
-        this.myTransactions.forEach(transaction => {
-          if (transaction.category.toLowerCase() === this.selectedCategory.toLowerCase()) {
-            for (let i = 0; i < this.monthList.length; i++) {
-              if (transaction.timestamp) {
-                if (moment(transaction.timestamp).format("MMMM") === this.monthList[i]) {
-                  amountList[i] += parseInt(transaction.amount);
-                }
-              }
-            }
-          }
-        });
-        // determine the chart background color depending on the selected category
-        for (let i = 0; i < this.myCategories.length; i++) {
-          if (this.myCategories[i].toLowerCase() === this.selectedCategory.toLowerCase()) {
-            color = backgroundColors[i];
-          }
-        }
-
-        // update chart with labels, data, colors
-        this.lineCategoryDatacollection = {
-          labels: this.monthList,
-          datasets: [
-            {
-              label: this.selectedCategory,
-              backgroundColor: color,
-              data: amountList
-            }
-          ]
-        };
-      }
+      this.initLineCharts(this.myCategories, "category", this.selectedCategory);
     },
     
     initTagLineChart() {
-      const amountList = [];
-      let color = "";
-
-      if (this.selectedTag && this.myTransactions) {
-        // get names of current and previous 5 months as chart labels
-        for (let i = 0; i < 6; i++) {
-          amountList.push(0);
-        }
-
-        this.myTransactions.forEach(transaction => {
-          if (transaction.tags) {
-            if (transaction.tags.includes(this.selectedTag)) {
-              for (let i = 0; i < this.monthList.length; i++) {
-                if (transaction.timestamp) {
-                  if (moment(transaction.timestamp).format("MMMM") === this.monthList[i]) {
-                    amountList[i] += parseInt(transaction.amount);
-                  }
-                }
-                
-              }
-            }
-          }
-        });
-
-        // determine the chart background color depending on the selected tag
-        for (let i = 0; i < this.myTags.length; i++) {
-          if (this.myTags[i].toLowerCase() === this.selectedTag.toLowerCase()) {
-            color = backgroundColors[i];
-          }
-        }
-
-        // update chart with labels, data, colors
-        this.lineTagDatacollection = {
-          labels: this.monthList,
-          datasets: [
-            {
-              label: this.selectedTag,
-              backgroundColor: color,
-              data: amountList
-            }
-          ]
-        };
-      }
+      this.initLineCharts(this.myTags, "tag", this.selectedTag);
     }
   }
 };

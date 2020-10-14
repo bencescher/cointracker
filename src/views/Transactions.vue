@@ -33,7 +33,9 @@
               >{{ myTag }}</p>
             </section>
             <section class="transaction__content--actions">
-              <i class="fas fa-edit"></i>
+              <router-link tag="span" :to="{ name: 'EditTransaction', params: { transactionId: transaction.id } }">
+                <i class="fas fa-edit"></i>
+              </router-link>
               <i
                 @click="deleteTransaction(transaction.id)"
                 class="far fa-trash-alt"

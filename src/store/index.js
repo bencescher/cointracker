@@ -42,6 +42,19 @@ export default new Vuex.Store({
         .add(newTransaction);
     },
 
+    UPDATE_TRANSACTION(state, updateParams) {
+      db.collection("userdata")
+        .doc(state.currentUser)
+        .collection("transactions")
+        .doc(updateParams.transactionId).update({
+          type: updateParams.editTransaction.type,
+          category: updateParams.editTransaction.category,
+          amount: updateParams.editTransaction.amount,
+          timestamp: updateParams.editTransaction.timestamp,
+          tags: updateParams.editTransaction.tags
+        });
+    },
+
     DELETE_TRANSACTION(state, transactionId) {
       db.collection("userdata")
         .doc(state.currentUser)
@@ -94,6 +107,10 @@ export default new Vuex.Store({
 
     createTransactions: ({ commit }, newTransaction) => {
       commit("CREATE_TRANSACTION", newTransaction);
+    },
+
+    updateTransaction: ({ commit }, updateParams) => {
+      commit("UPDATE_TRANSACTION", updateParams)
     },
 
     deleteTransaction: ({ commit }, transactionId) => {
