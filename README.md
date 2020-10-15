@@ -1,8 +1,8 @@
-#Cointracker
+# Cointracker
 
 A Personal Financial Management app enabling to track expenses and incomes.
 
-##Stack
+## Stack
 
 - Framework: Vue.js with Vuex and VueCLI
 - Libraries: Chart.js

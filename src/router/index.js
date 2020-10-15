@@ -7,7 +7,7 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: "*",
-    redirect: "/"
+    redirect: "/dashboard"
   },
   {
     path: "/",
@@ -80,13 +80,23 @@ router.beforeEach((to, from, next) => {
     if (firebase.auth().currentUser) {
       next();
     } else {
-      next({ name: "Login" });
+      next({
+        path: '/login',
+        query: {
+          redirect: to.fullPath
+        }
+      });
     }
   } else if (to.matched.some(rec => rec.meta.requiresGuest)) {
     if (!firebase.auth().currentUser) {
       next();
     } else {
-      next({ name: "Dashboard" });
+      next({
+        path: '/dashboard',
+        query: {
+          redirect: to.fullPath
+        }
+      });
     }
   } else {
     next();
